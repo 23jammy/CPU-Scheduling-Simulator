@@ -250,7 +250,8 @@ $(document).ready(function () {
         });
 
         // --- Post-Simulation Metrics & Rendering ---
-        let totalTAT = 0, totalWT = 0, totalBurst = 0, maxFinishTime = 0;
+        // ADDED: totalRT initialized to 0
+        let totalTAT = 0, totalWT = 0, totalRT = 0, totalBurst = 0, maxFinishTime = 0;
 
         results.forEach(p => {
             // TAT = Completion Time - Arrival Time
@@ -265,6 +266,7 @@ $(document).ready(function () {
             // Accumulate totals for averages later
             totalTAT += p.tat;
             totalWT += p.wt;
+            totalRT += p.rt; 
             totalBurst += p.bt;
 
             // Track the moment the very last process finished
@@ -278,6 +280,9 @@ $(document).ready(function () {
         // Update UI with calculated averages and CPU utilization
         $('#avg-tat').text((totalTAT / processes.length).toFixed(2) + " ms");
         $('#avg-wt').text((totalWT / processes.length).toFixed(2) + " ms");
+
+        // ADDED: Logic to display Average Response Time (Requires an HTML element with id="avg-rt")
+        $('#avg-rt').text((totalRT / processes.length).toFixed(2) + " ms");
 
         const util = ((totalBurst / maxFinishTime) * 100).toFixed(2);
         $('#cpu-util').text(isNaN(util) ? "0%" : util + "%");
@@ -464,7 +469,7 @@ $(document).ready(function () {
         $chart.empty();
         $ruler.empty();
 
-        $ruler.append('<span class="absolute text-xs text-gray-500 font-bold mt-1" style="lesft: 0; transform: translateX(-50%);">0</span>');
+        $ruler.append('<span class="absolute text-xs text-gray-500 font-bold mt-1" style="left: 0; transform: translateX(-50%);">0</span>');
 
         let cumulativePercent = 0;
         let animationDelay = 0;
@@ -529,6 +534,7 @@ $(document).ready(function () {
                             <td class="py-3 px-4 text-center text-theme-dark font-bold">${p.ct}</td>
                             <td class="py-3 px-4 text-center">${p.tat}</td>
                             <td class="py-3 px-4 text-center">${p.wt}</td>
+                            <td class="py-3 px-4 text-center">${p.rt}</td> <!-- ADDED: RT Column -->
                         </tr>
                     `;
             $tbody.append(row);
