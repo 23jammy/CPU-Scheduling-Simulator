@@ -1,0 +1,81 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c7c7c7;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.gantt-bar {
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: width 0.1s linear;
+}
+
+.text-theme-blue {
+    color: #809bce;
+}
+
+.bg-theme-blue {
+    background-color: #809bce;
+}
+
+.border-theme-blue {
+    border-color: #809bce;
+}
+
+.hover-bg-theme-blue:hover {
+    background-color: #6a85b9;
+}
+
+.bg-theme-mint {
+    background-color: #b8e0d2;
+}
+
+.border-theme-mint {
+    border-color: #b8e0d2;
+}
+
+.hover-bg-theme-mint:hover {
+    background-color: #a0d4c0;
+}
+
+.bg-theme-pink {
+    background-color: #eac4d5;
+}
+
+.border-theme-pink {
+    border-color: #eac4d5;
+}
+
+.hover-bg-theme-pink:hover {
+    background-color: #dcb0c5;
+}
+
+.text-theme-dark {
+    color: #0d1b2a;
+}
+
+.bg-theme-dark {
+    background-color: #0d1b2a;
+}
+
+.hover-bg-theme-dark:hover {
+    background-color: #1b2d41;
+}

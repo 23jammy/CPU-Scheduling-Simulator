@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU Scheduling Simulator</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="text-theme-dark">
+
+    <div class="container mx-auto px-4 py-6 md:py-8 max-w-6xl">
+        
+        <!-- Header -->
+        <header class="mb-6 md:mb-8 text-center">
+            <div class="flex items-center justify-center gap-3 mb-2">
+                <img src="img/processor.png" alt="processor" onerror="this.style.display='none'; this.nextElementSibling.innerHTML='<i class=\'fa-solid fa-microchip mr-2 text-theme-blue\'></i>' + this.nextElementSibling.innerHTML" class="w-10 h-10 object-contain">
+                <h1 class="text-2xl md:text-4xl font-bold text-theme-dark">
+                    CPU Scheduling Simulator
+                </h1>
+            </div>
+            <p class="text-gray-500 text-sm md:text-base">
+                Visualize FCFS, SJF, and Priority Scheduling Algorithms
+            </p>
+        </header>
+
+        <!-- Configuration Section -->
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-8 border border-theme-blue border-opacity-30">
+            
+            <!-- Top Controls -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                
+                <!-- Algorithm Selection -->
+                <div class="w-full md:w-1/3">
+                    <label class="block text-sm font-bold text-theme-dark mb-2">Scheduling Algorithm</label>
+                    <div class="relative">
+                        <select id="algorithm-select" class="block w-full appearance-none bg-gray-50 border border-gray-300 text-theme-dark py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-[#0d1b2a] transition font-medium">
+                            <option value="FCFS">First-Come, First-Served (FCFS)</option>
+                            <option value="SJF">Shortest Job First (Non-Preemptive)</option>
+                            <option value="Priority">Priority (Non-Preemptive)</option>
+                            <option value="PriorityPreemptive">Priority (Preemptive)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-theme-dark">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 w-full md:w-auto">
+                    <button id="add-process-btn" class="flex-1 md:flex-none justify-center bg-theme-mint hover-bg-theme-mint text-theme-dark font-bold py-2 px-4 rounded shadow transition flex items-center">
+                        <i class="fa-solid fa-plus mr-2"></i> Add
+                    </button>
+                    <button id="reset-btn" class="flex-1 md:flex-none justify-center bg-theme-pink hover-bg-theme-pink text-theme-dark font-bold py-2 px-4 rounded shadow transition flex items-center">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- CSV Upload Section -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 relative">
+                <h3 class="text-sm font-bold text-theme-dark mb-2">Import Data (CSV)</h3>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-xs text-gray-500 flex-1">
+                        <p class="mb-1"><strong>Instructions:</strong> Upload a <code>.csv</code> file with no header.</p>
+                        <p>Format per line: <code>Arrival Time, Burst Time, Priority [for priority scheduling]</code></p>
+                        <p class="mt-1 font-semibold text-theme-blue">System Limit: Max 20 processes.</p>
+                        <p class="italic mt-1">Example: <code>0, 5, 1</code></p>
+                    </div>
+                    <div>
+                        <input type="file" id="csv-input" accept=".csv" class="hidden">
+                        <label for="csv-input" class="cursor-pointer bg-theme-blue hover-bg-theme-blue text-white text-sm font-bold py-2 px-4 rounded shadow inline-flex items-center">
+                            <i class="fa-solid fa-file-csv mr-2"></i> Upload CSV
+                        </label>
+                    </div>
+                </div>
+                <div id="file-error-message" class="text-red-500 text-xs mt-2 font-semibold hidden text-center"></div>
+            </div>
+
+            <!-- Input Table -->
+            <div class="overflow-x-auto custom-scrollbar rounded-lg border border-gray-200">
+                <table class="w-full text-left border-collapse min-w-[500px]">
+                    <thead>
+                        <tr class="bg-theme-dark text-white uppercase text-xs leading-normal">
+                            <th class="py-3 px-4 md:px-6 text-center">Process ID</th>
+                            <th class="py-3 px-4 md:px-6 text-center">Arrival Time</th>
+                            <th class="py-3 px-4 md:px-6 text-center">Burst Time</th>
+                            <th class="py-3 px-4 md:px-6 text-center priority-col hidden">Priority (Low # = High)</th>
+                            <th class="py-3 px-4 md:px-6 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="input-table-body" class="text-theme-dark text-sm font-medium">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Run Button -->
+            <div class="mt-6 text-center">
+                <button id="run-simulation-btn" class="w-full md:w-auto bg-theme-dark hover-bg-theme-dark text-white text-lg font-bold py-3 px-10 rounded-full shadow-lg transform hover:-translate-y-1 transition duration-200">
+                    <i class="fa-solid fa-play mr-2"></i> Simulate
+                </button>
+            </div>
+            <div id="error-message" class="mt-4 text-center text-red-500 font-semibold hidden"></div>
+        </div>
+
+        <!-- Results Section (Hidden initially) -->
+        <div id="results-section" class="hidden space-y-8 animate-fade-in-up">
+            
+            <!-- Gantt Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-2 md:p-4 border border-gray-100">
+                <h2 class="text-xl font-bold text-theme-dark mb-4 border-b pb-2">Gantt Chart Visualization</h2>
+                <div class="overflow-x-auto custom-scrollbar pb-4">
+                    <div class="min-w-[600px] relative pt-6 pb-2">
+                        <div id="gantt-chart" class="flex 11/12 h-16 bg-gray-50 rounded-lg overflow-hidden border border-gray-300 relative">
+                        </div>
+                        <div id="time-ruler" class="relative 11/12 h-6 mt-1 text-xs text-gray-500 font-mono pl-1">
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 italic md:hidden text-center mt-2">Swipe right to see full timeline</p>
+            </div>
+
+            <!-- Metrics & Table -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Detailed Table -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-4 md:p-6 border border-gray-100">
+                    <h2 class="text-xl font-bold text-theme-dark mb-4 border-b pb-2">Process Details</h2>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-theme-mint text-theme-dark text-xs uppercase font-bold">
+                                    <th class="py-2 px-4">ID</th>
+                                    <th class="py-2 px-4">Arrival</th>
+                                    <th class="py-2 px-4">Burst</th>
+                                    <th class="py-2 px-4 priority-col-result hidden">Priority</th>
+                                    <th class="py-2 px-4 text-center">Finish</th>
+                                    <th class="py-2 px-4 text-center">Turnaround</th>
+                                    <th class="py-2 px-4 text-center">Waiting</th>
+                                </tr>
+                            </thead>
+                            <tbody id="result-table-body" class="text-sm">
+                                <!-- Results -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CPU Metrics Cards -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-theme-blue">
+                        <div class="text-gray-500 text-sm uppercase font-bold">Avg. Turnaround Time</div>
+                        <div class="text-3xl font-bold text-theme-blue mt-2" id="avg-tat">0.00 ms</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-theme-mint">
+                        <div class="text-gray-500 text-sm uppercase font-bold">Avg. Waiting Time</div>
+                        <div class="text-3xl font-bold text-[#6a9e8b] mt-2" id="avg-wt">0.00 ms</div>
+                    </div>
+                     <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-theme-pink">
+                        <div class="text-gray-500 text-sm uppercase font-bold">CPU Utilization</div>
+                        <div class="text-3xl font-bold text-[#c98ba8] mt-2" id="cpu-util">100%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 CPU Scheduler Simulator. Built with HTML, jQuery & Tailwind.</p>
+        </footer>
+
+    </div>
+</body>
+</html>
